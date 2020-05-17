@@ -70,7 +70,7 @@ export class StreamChat {
 		this.node = !this.browser;
 
 		const defaultOptions = {
-			timeout: 3000,
+			timeout: 9000,
 		};
 
 		if (this.node) {
@@ -85,7 +85,10 @@ export class StreamChat {
 			delete this.options.httpsAgent;
 		}
 
-		this.setBaseURL('https://chat-us-east-1.stream-io-api.com');
+		const connectionURL =
+			(options || {}).server_url || 'https://chat-us-east-1.stream-io-api.com';
+		this.setBaseURL(connectionURL);
+		this.setWsBaseURL(connectionURL);
 
 		if (typeof process !== 'undefined' && process.env.STREAM_LOCAL_TEST_RUN) {
 			this.setBaseURL('http://localhost:3030');
@@ -161,7 +164,10 @@ export class StreamChat {
 
 	setBaseURL(baseURL) {
 		this.baseURL = baseURL;
-		this.wsBaseURL = this.baseURL.replace('http', 'ws');
+	}
+
+	setWsBaseURL(baseURL) {
+		this.wsBaseURL = baseURL.replace('http', 'ws');
 	}
 
 	_setupConnection() {
