@@ -47,6 +47,8 @@ export class StreamChat {
 		this.key = key;
 		this.userToken = null;
 		this.secret = null;
+		this.fcToken = null;
+		this.historyTool = null;
 		this.listeners = {};
 		this.state = new ClientState();
 		// a list of channels to hide ws events from
@@ -85,10 +87,13 @@ export class StreamChat {
 			delete this.options.httpsAgent;
 		}
 
-		const connectionURL =
-			(options || {}).server_url || 'https://chat-us-east-1.stream-io-api.com';
+		const checkOptions = options || {};
+		const defaultGetStreamURL = 'https://chat-us-east-1.stream-io-api.com';
+		const connectionURL = checkOptions.server_url || defaultGetStreamURL;
+		const wsConnectionURL = checkOptions.ws_server_url || defaultGetStreamURL;
 		this.setBaseURL(connectionURL);
-		this.setWsBaseURL(connectionURL);
+		this.setDefaultURL(defaultGetStreamURL);
+		this.setWsBaseURL(wsConnectionURL);
 
 		if (typeof process !== 'undefined' && process.env.STREAM_LOCAL_TEST_RUN) {
 			this.setBaseURL('http://localhost:3030');
@@ -162,12 +167,24 @@ export class StreamChat {
 		return this.anonymous ? 'anonymous' : 'jwt';
 	}
 
+	setDefaultURL(defaultURL) {
+		this.defaultURL = defaultURL;
+	}
+
+	setHistoryTool(historyTool) {
+		this.historyTool = historyTool;
+	}
+
 	setBaseURL(baseURL) {
 		this.baseURL = baseURL;
 	}
 
 	setWsBaseURL(baseURL) {
 		this.wsBaseURL = baseURL.replace('http', 'ws');
+	}
+
+	setFcToken(fcToken) {
+		this.fcToken = 'Bearer ' + fcToken;
 	}
 
 	_setupConnection() {
@@ -1370,6 +1387,7 @@ export class StreamChat {
 				Authorization: token,
 				'stream-auth-type': this.getAuthType(),
 				'x-stream-client': this._userAgent(),
+				'x-fc-authorization': this.fcToken,
 			},
 		};
 	}

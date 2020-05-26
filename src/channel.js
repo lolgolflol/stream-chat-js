@@ -88,7 +88,7 @@ export class Channel {
 
 	sendFile(uri, name, contentType, user) {
 		return this.getClient().sendFile(
-			`${this._channelURL()}/file`,
+			`${this._channelDefaultURL()}/file`,
 			uri,
 			name,
 			contentType,
@@ -98,7 +98,7 @@ export class Channel {
 
 	sendImage(uri, name, contentType, user) {
 		return this.getClient().sendFile(
-			`${this._channelURL()}/image`,
+			`${this._channelDefaultURL()}/image`,
 			uri,
 			name,
 			contentType,
@@ -963,6 +963,13 @@ export class Channel {
 			throw new Error('channel id is not defined');
 		}
 		return `${this.getClient().baseURL}/channels/${this.type}/${this.id}`;
+	};
+
+	_channelDefaultURL = () => {
+		if (!this.id) {
+			throw new Error('channel id is not defined');
+		}
+		return `${this.getClient().defaultURL}/channels/${this.type}/${this.id}`;
 	};
 
 	_checkInitialized() {
