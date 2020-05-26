@@ -49,6 +49,7 @@ export class StreamChat {
 		this.secret = null;
 		this.fcToken = null;
 		this.historyTool = null;
+		this.errorTool = null;
 		this.listeners = {};
 		this.state = new ClientState();
 		// a list of channels to hide ws events from
@@ -173,6 +174,10 @@ export class StreamChat {
 
 	setHistoryTool(historyTool) {
 		this.historyTool = historyTool;
+	}
+
+	setErrorTool(errorTool) {
+		this.errorTool = errorTool;
 	}
 
 	setBaseURL(baseURL) {
@@ -495,10 +500,42 @@ export class StreamChat {
 		});
 	}
 
+	_checkAPIResponse(response) {
+		return (
+			((!!response.success === false &&
+				!!response.fc_error_code &&
+				!!response.fc_error) ||
+				(!!(response.data || {}).success === false &&
+					!!(response.data || {}).fc_error_code &&
+					!!(response.data || {}).fc_error)) &&
+			!!this.errorTool
+		);
+	}
+
+	_executeAPIErrorResponse(response) {
+		if (
+			!!response.success === false &&
+			!!response.fc_error_code &&
+			!!response.fc_error &&
+			!!this.errorTool
+		)
+			return this.errorTool.execute(response);
+		if (
+			!!(response.data || {}).success === false &&
+			!!(response.data || {}).fc_error_code &&
+			!!(response.data || {}).fc_error &&
+			!!this.errorTool
+		)
+			return this.errorTool.execute(response.data);
+	}
+
 	async get(url, params) {
 		try {
 			this._logApiRequest('get', url, {}, this._addClientParams(params));
 			const response = await axios.get(url, this._addClientParams(params));
+			if (this._checkAPIResponse(response)) {
+				return this._executeAPIErrorResponse(response);
+			}
 			this._logApiResponse('get', url, response);
 
 			return this.handleResponse(response);
@@ -518,6 +555,9 @@ export class StreamChat {
 			this._logApiRequest('put', url, data, this._addClientParams());
 			response = await axios.put(url, data, this._addClientParams());
 			this._logApiResponse('put', url, response);
+			if (this._checkAPIResponse(response)) {
+				return this._executeAPIErrorResponse(response);
+			}
 
 			return this.handleResponse(response);
 		} catch (e) {
@@ -536,6 +576,9 @@ export class StreamChat {
 			this._logApiRequest('post', url, data, this._addClientParams());
 			response = await axios.post(url, data, this._addClientParams());
 			this._logApiResponse('post', url, response);
+			if (this._checkAPIResponse(response)) {
+				return this._executeAPIErrorResponse(response);
+			}
 
 			return this.handleResponse(response);
 		} catch (e) {
@@ -554,6 +597,9 @@ export class StreamChat {
 			this._logApiRequest('patch', url, data, this._addClientParams());
 			response = await axios.patch(url, data, this._addClientParams());
 			this._logApiResponse('patch', url, response);
+			if (this._checkAPIResponse(response)) {
+				return this._executeAPIErrorResponse(response);
+			}
 
 			return this.handleResponse(response);
 		} catch (e) {
@@ -572,6 +618,9 @@ export class StreamChat {
 			this._logApiRequest('delete', url, {}, this._addClientParams());
 			response = await axios.delete(url, this._addClientParams(params));
 			this._logApiResponse('delete', url, response);
+			if (this._checkAPIResponse(response)) {
+				return this._executeAPIErrorResponse(response);
+			}
 
 			return this.handleResponse(response);
 		} catch (e) {
