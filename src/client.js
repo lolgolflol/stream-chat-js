@@ -89,7 +89,7 @@ export class StreamChat {
 		}
 
 		const checkOptions = options || {};
-		const defaultGetStreamURL = 'https://chat-us-east-1.stream-io-api.com';
+		const defaultGetStreamURL = 'https://chat-proxy-singapore.stream-io-api.com';
 		const connectionURL = checkOptions.server_url || defaultGetStreamURL;
 		const wsConnectionURL = checkOptions.ws_server_url || defaultGetStreamURL;
 		this.setBaseURL(connectionURL);
@@ -445,7 +445,7 @@ export class StreamChat {
 		this.listeners[key].push(callback);
 		return {
 			unsubscribe: () => {
-				this.listeners[key] = this.listeners[key].filter(el => el !== callback);
+				this.listeners[key] = this.listeners[key].filter((el) => el !== callback);
 			},
 		};
 	}
@@ -468,7 +468,7 @@ export class StreamChat {
 		this.logger('info', `Removing listener for ${key} event`, {
 			tags: ['event', 'client'],
 		});
-		this.listeners[key] = this.listeners[key].filter(value => value !== callback);
+		this.listeners[key] = this.listeners[key].filter((value) => value !== callback);
 	}
 
 	_logApiRequest(type, url, data, config) {
@@ -688,7 +688,7 @@ export class StreamChat {
 		return data;
 	}
 
-	dispatchEvent = event => {
+	dispatchEvent = (event) => {
 		// client event handlers
 		this._handleClientEvent(event);
 
@@ -706,7 +706,7 @@ export class StreamChat {
 		}
 	};
 
-	handleEvent = messageEvent => {
+	handleEvent = (messageEvent) => {
 		// dispatch the event to the channel listeners
 		const jsonString = messageEvent.data;
 		const event = JSON.parse(jsonString);
@@ -730,7 +730,7 @@ export class StreamChat {
 			if (event.user.id === this.userID) {
 				this.user = { ...this.user, ...event.user };
 				// Updating only available properties in _user object.
-				Object.keys(event.user).forEach(function(key) {
+				Object.keys(event.user).forEach(function (key) {
 					if (key in client._user) {
 						client._user[key] = event.user[key];
 					}
@@ -756,7 +756,7 @@ export class StreamChat {
 
 	_muteStatus(cid) {
 		let muteStatus;
-		this.mutedChannels.forEach(function(mute) {
+		this.mutedChannels.forEach(function (mute) {
 			if (mute.channel.cid === cid) {
 				let muted = true;
 				if (mute.expires) {
@@ -781,7 +781,7 @@ export class StreamChat {
 		};
 	}
 
-	_callClientListeners = event => {
+	_callClientListeners = (event) => {
 		const client = this;
 		// gather and call the listeners
 		const listeners = [];
@@ -1380,7 +1380,7 @@ export class StreamChat {
 			'user',
 		];
 
-		reservedMessageFields.forEach(function(item) {
+		reservedMessageFields.forEach(function (item) {
 			if (clonedMessage[item] != null) {
 				delete clonedMessage[item];
 			}
